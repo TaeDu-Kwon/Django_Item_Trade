@@ -38,4 +38,19 @@ class CreateProductView(generics.CreateAPIView):
 
 # 상품 get / update / delete 는 viewsets 사용
 
+class ProductViewsets(viewsets.ModelViewSet):
+    
+    def get_recently_create_item(self, request, *args, **kwargs):
+        product_type = kwargs.get("product_type")
 
+        if product_type == "account":
+            queryset = AccountProduct
+        elif product_type == "item":
+            queryset = ItemProduct
+        elif product_type == "game_money":
+            queryset = GameMoneyProduct
+        else:
+            return Response({"error":"타입이 다릅니다."},status=status.HTTP_400_BAD_REQUEST)
+        
+        data = queryset.objects.all().order_by("create_at")[:15]
+        return Response(data,status=status.HTTP_200_OK)

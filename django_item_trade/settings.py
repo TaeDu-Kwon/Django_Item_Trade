@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'users',
     'items',
+    'item_trade_page',
     
 ]
 

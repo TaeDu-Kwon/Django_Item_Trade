@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입</title>
+    <style>
+        /* 전체 페이지 스타일 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f9f9f9;
+        }
+
+        /* 회원가입 카드 스타일 */
+        .signup-container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* 제목 스타일 */
+        .signup-container h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* 입력 필드 스타일 */
+        .signup-container input[type="text"],
+        .signup-container input[type="password"],
+        .signup-container input[type="email"],
+        .signup-container input[type="tel"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            outline: none;
+            background: transparent;
+        }
+
+        .signup-container input:focus {
+            border-bottom: 1px solid #007bff;
+        }
+
+        /* 버튼 스타일 */
+        .signup-container button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(to right, #36d1dc, #5b86e5);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .signup-container button:hover {
+            background: linear-gradient(to right, #5b86e5, #36d1dc);
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <h1>회원가입</h1>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" id = "username" name="username" placeholder="사용자 이름" required>
+            <input type="email" id = "email" name="email" placeholder="이메일" required>
+            <input type="password" id = "password" name="password" placeholder="비밀번호" required>
+            <input type="password" id = "password2" name="password2" placeholder="비밀번호 확인" required>
+            <button type="submit">회원가입</button>
+        </form>
+        <div>
+            {%if messages%}
+                <ul>
+                    {% for message in messages %}
+                        <li>{{message}}</li>
+                    {% endfor %}
+                </ul>
+            {%endif%}
+        </div>
+    </div>
+</body>
+</html>

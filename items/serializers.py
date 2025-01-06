@@ -22,7 +22,7 @@ class AccountProductSerializer(ProductSerializer):
 class ItemProductSerializer(ProductSerializer):
     item_name = serializers.CharField()
     quantity = serializers.IntegerField()
-    price_pre_item = serializers.DecimalField(max_digits=10, decimal_places=2)
+    price_per_item = serializers.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
         model = ItemProduct
