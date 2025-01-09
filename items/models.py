@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 # Create your models here.
+import os
 
 class Game(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -48,3 +49,18 @@ class GameMoneyProduct(Product):
 
     def __str__(self):
         return f"{self.product_type} - {self.game}"
+    
+def product_image_upload_path(instance,filename):
+    # product 인스턴스에서 필요한 필드 값을 기반으로 이미지 저장 경로 설정
+    seller_name = instance.product.seller.username
+    product_type = instance.product.product_type
+    game_name = "test"#instance.game.name
+    product_title = instance.product.title
+
+    return os.path.join(game_name,product_type,seller_name,product_title)
+    
+class ProductImage(models.Model):
+    account_product = models.ForeignKey(AccountProduct, blank=True, null=True, on_delete=models.CASCADE)
+    item_product = models.ForeignKey(ItemProduct,blank=True,null=True, on_delete=models.CASCADE)
+    game_money_product = models.ForeignKey(GameMoneyProduct,blank=True, null=True,on_delete=models.CASCADE)
+    product_image = models.ImageField(upload_to="")

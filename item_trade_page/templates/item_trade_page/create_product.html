@@ -50,7 +50,7 @@
 </head>
 <body>
     <h1>상품 등록</h1>
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.product_type.label_tag }}
         {{ form.product_type }}
@@ -66,6 +66,12 @@
         <div>
             {{ form.description.label_tag }}
             {{ form.description }}
+        </div>
+        <div>
+            <!-- {{ form.product_image.label_tag }}
+            {{ form.product_image }} -->
+            <label for="images">Upload Images</label>
+            <input type="file" name="images" id="images" multiple><br>
         </div>
 
         <!-- AccountProduct 전용 필드 -->

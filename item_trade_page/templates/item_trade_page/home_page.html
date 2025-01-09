@@ -95,7 +95,7 @@
     <header>
         <div class="logo">로고</div>
         <div class="search-bar">
-            <input type="text" placeholder="검색어를 입력하세요">
+            <input type="text" placeholder="게임 이름을 입력하세요">
         </div>
         {% if not user.is_authenticated %}
             <div class="buttons">
@@ -104,7 +104,7 @@
             </div>
         {% else %}
             <div class="buttons">
-                <a href="#" style="margin-left: 10px;">{{user.username}}</a>
+                <a href="{% url 'item_trade:logout' %}" style="margin-left: 10px;">{{user.username}}</a>
                 <a href="{% url 'item_trade:create_product' %}"><button>상품 등록</button></a>
                 <a href="#"><button>장바구니</button></a>
             </div>
@@ -128,36 +128,77 @@
         </div>
     </section>
     <section class="latest-items">
-        <h2>최신 등록 물품 리스트</h2>
-        <ul>
-            <a href="#"><button>계정</button></a>
-            <a href="#"><button>아이템</button></a>
-            <a href="#"><button>게임 머니</button></a>
-        </ul>
+        <h1>최신 등록 물품 리스트</h1>
+        <h2> 계정 </h2>
         <table>
             <thead>
                 <tr>
-                    <th>번호</th>
-                    <th>물품 이름</th>
-                    <th>카테고리</th>
-                    <th>가격</th>
-                    <th>등록 날짜</th>
+                    <th>Game</th>
+                    <th>Title</th>
+                    <th>Class</th>
+                    <th>Price</th>
+                    <th>Seller</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>1</td>
-                    <td>물품 A</td>
-                    <td>전자제품</td>
-                    <td>₩100,000</td>
-                    <td>2025-01-06</td>
+                    {% for account in table_data.account_data %}
+                        <th>{{account.game}}</th>
+                        <th>{{account.title}}</th>
+                        <th>{{account.account_class}}</th>
+                        <th>{{account.price}}</th>
+                        <th>{{account.seller}}</th>
+                    {%endfor%}
                 </tr>
+            </tbody>
+        </table>
+        <br><br><br>
+        <h2> 아이템 </h2>
+        <table>
+            <thead>
                 <tr>
-                    <td>2</td>
-                    <td>물품 B</td>
-                    <td>가구</td>
-                    <td>₩50,000</td>
-                    <td>2025-01-05</td>
+                    <th>Game</th>
+                    <th>Title</th>
+                    <th>Item Name</th>
+                    <th>Quantity</th>
+                    <th>Price Per Item</th>
+                    <th>Seller</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for item in table_data.item_data %}
+                        <th>{{item.game}}</th>
+                        <th>{{item.title}}</th>
+                        <th>{{item.item_name}}</th>
+                        <th>{{item.quantity}}</th>
+                        <th>{{item.price_per_item}}</th>
+                        <th>{{account.seller}}</th>
+                    {%endfor%}
+                </tr>
+            </tbody>
+        </table>
+        <br><br><br>
+        <h2> 게임 머니 </h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Game</th>
+                    <th>Title</th>
+                    <th>Total Amount</th>
+                    <th>Total Price</th>
+                    <th>Seller</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for game_money in table_data.game_money_data %}
+                        <th>{{game_money.game}}</th>
+                        <th>{{game_money.title}}</th>
+                        <th>{{game_money.total_amount}}</th>
+                        <th>{{game_money.total_price}}</th>
+                        <th>{{game_money.seller}}</th>
+                    {%endfor%}
                 </tr>
             </tbody>
         </table>

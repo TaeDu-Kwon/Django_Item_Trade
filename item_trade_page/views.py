@@ -7,7 +7,7 @@ import requests
 
 #User
 from users.serializers import SignUpSerializer,LoginSerializer
-from django.contrib.auth import login
+from django.contrib.auth import login,logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 
@@ -16,16 +16,19 @@ from items.models import Game
 API_PATH = "http://127.0.0.1:8001/"
 
 def home_page(request):
-    # path = "http://127.0.0.1:8001/products/get-recently-create-item/account"
-    # try:
-    #     res = requests.get(path)
-    #     items = res.json()
-    #     print(1)
-    #     print(items)
-    #     print(2)
-    # except:
-    #     pass
-    return render(request,"item_trade_page/home_page.html",{"user" : request.user})
+    path = "http://127.0.0.1:8001/products/get-recently-create-item"
+    items = {}
+    
+    res = requests.get(path)
+    items = res.json()
+
+    table_data = {
+        "account_data" : items["account_data"],
+        "item_data" : items["item_data"],
+        "game_money_data" : items["game_money_data"]
+    }
+    
+    return render(request,"item_trade_page/home_page.html",{"user" : request.user,"table_data":table_data})
 
 def login_page(request):
     if request.method == "POST":
@@ -59,6 +62,10 @@ def signup_page(request):
     
     return render(request, "item_trade_page/signup_page.html")
 
+def logout_view(request):
+    logout(request)
+    return redirect("item_trade:home_page")
+
 @login_required # 로그인이 필요한 뷰
 def create_product_view(request):
     form = ProductForm()  # 기본 폼
@@ -66,7 +73,6 @@ def create_product_view(request):
     if request.method == "POST":
        
         selected_game = request.POST.get("game")
-        game = Game.objects.get(pk = int(selected_game))
         user = request.user.id
         product_type = request.POST.get("product_type")
 
@@ -91,12 +97,14 @@ def create_product_view(request):
             data["total_amount"] = request.POST.get("total_amount")
             data["total_price"] = request.POST.get("total_price")
 
-        respone = requests.post(API_PATH+"products/create/",data)
-        print("----------")
-        print(data)
-        print("---------")
-        print(respone.json())
-        print("----------")
+        # 이미지 넘기기기
+        files = []
+        if request.FILES.getlist('images'):
+            for image in request.FILES.getlist('images'):
+                files.append(('product_image', image))
+
+        respone = requests.post(API_PATH+"products/create/",data=data, files=files)
+
         if respone.status_code == 201:
             return redirect("item_trade:home_page")  
 
