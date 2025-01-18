@@ -35,14 +35,14 @@ class ItemProductSerializer(ProductSerializer):
     quantity = serializers.IntegerField()
     price_per_item = serializers.DecimalField(max_digits=10, decimal_places=2)
 
-    game = serializers.SlugRelatedField(
-        queryset=Game.objects.all(),
-        slug_field="name"  # 출력할 필드
-    )
-    seller = serializers.SlugRelatedField(
-        queryset=User.objects.all(),
-        slug_field="username"  # 출력할 필드
-    )
+    # game = serializers.SlugRelatedField(
+    #     queryset=Game.objects.all(),
+    #     slug_field="name"  # 출력할 필드
+    # )
+    # seller = serializers.SlugRelatedField(
+    #     queryset=User.objects.all(),
+    #     slug_field="username"  # 출력할 필드
+    # )
 
     class Meta:
         model = ItemProduct

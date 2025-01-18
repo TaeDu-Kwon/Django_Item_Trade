@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상품 상세 페이지</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: rgb(158, 158, 158);
+        }
+        .product-container {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .product-info {
+            margin-bottom: 20px;
+        }
+        .product-info h5 {
+            font-weight: bold;
+        }
+        .description-box, .image-box {
+            border: 2px solid #000;
+            padding: 20px;
+            margin-top: 10px;
+        }
+        .carousel-inner img {
+            max-height: 400px;
+            object-fit: contain;
+            margin: 0 auto;
+        }
+        .quantity-box {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .quantity-box input {
+            text-align: center;
+            max-width: 60px;
+            margin: 0 10px;
+        }
+        .summary-box {
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        function updateQuantity(maxQuantity) {
+            const quantityInput = document.getElementById('quantity');
+            let currentQuantity = parseInt(quantityInput.value);
+
+            if (currentQuantity < 1) {
+                quantityInput.value = 1;
+            } else if (currentQuantity > maxQuantity) {
+                quantityInput.value = maxQuantity;
+            }
+        }
+
+        function incrementQuantity(maxQuantity) {
+            const quantityInput = document.getElementById('quantity');
+            let currentQuantity = parseInt(quantityInput.value);
+            if (currentQuantity < maxQuantity) {
+                quantityInput.value = currentQuantity + 1;
+            }
+        }
+
+        function decrementQuantity() {
+            const quantityInput = document.getElementById('quantity');
+            let currentQuantity = parseInt(quantityInput.value);
+            if (currentQuantity > 1) {
+                quantityInput.value = currentQuantity - 1;
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="product-container">
+            <h2>{{ product_data.0.title }}</h2>
+            <p>{{ product_data.0.created_at|date:"Y-m-d H:i:s" }}</p>
+            <hr>
+
+            <!-- 상품 정보 -->
+            <div class="product-info row">
+                <div class="col-md-6">
+                    <h5>물품 정보</h5>
+                    <p><strong>게임:</strong> {{ product_data.0.game }}</p>
+                    <p><strong>아이템:</strong> {{ product_data.0.item_name }}</p>
+                    <p><strong>수량:</strong> {{ product_data.0.quantity }}</p>
+                    <p><strong>상세 가격:</strong> {{ product_data.0.price_per_item }}원</p>
+                </div>
+
+                <!-- 수량 선택 및 총 금액 -->
+                <div class="col-md-6">
+                    <div class="quantity-box">
+                        <button type="button" class="btn btn-outline-secondary" onclick="decrementQuantity()">-</button>
+                        <input type="number" id="quantity" value="1" min="1" max="{{ product_data.0.quantity }}" onchange="updateQuantity({{ product_data.0.quantity }})">
+                        <button type="button" class="btn btn-outline-secondary" onclick="incrementQuantity({{ product_data.0.quantity }})">+</button>
+                    </div>
+                    <p><strong>총 금액:</strong> <span id="total-price">{{ product_data.0.price_per_item }}</span>원</p>
+                    <button class="btn btn-primary">장바구니</button>
+                    <button class="btn btn-success">구매</button>
+                </div>
+            </div>
+
+            <!-- 설명 -->
+            <div class="description-box">
+                <h5>설명</h5>
+                <p>{{ product_data.0.description|default:"설명이 없습니다." }}</p>
+            </div>
+
+            <!-- 이미지 슬라이더 -->
+            <div class="image-box">
+                <h5>이미지</h5>
+                <div id="imageCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        {% for image in image_data %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <img src="{{ image.product_image }}" class="d-block w-100" alt="상품 이미지">
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#imageCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">이전</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#imageCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">다음</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

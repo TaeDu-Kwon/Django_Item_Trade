@@ -67,3 +67,36 @@ class ProductViewsets(viewsets.ModelViewSet):
             "item_data" : item_serializer.data,
             "game_money_data" : game_money_serializer.data
         },status=status.HTTP_200_OK)
+
+    def get_product_info(self,request, *args, **kwargs):
+        # 상품 상세 페이지지
+        product_id = kwargs.get("product_id")
+        product_type = kwargs.get("product_type")
+
+        if product_type == "account":
+            account_product = AccountProduct.objects.filter(pk=product_id)
+            images = ProductImage.objects.filter(account_product = product_id)
+
+            serializer = AccountProductSerializer(account_product, many = True)
+            images_serializer = ProductImageSerializer(images, many=True)
+
+        elif product_type == "item":
+            item_product = ItemProduct.objects.filter(pk = product_id)
+            images = ProductImage.objects.filter(item_product = product_id)
+
+            serializer = ItemProductSerializer(item_product, many = True)
+            images_serializer = ProductImageSerializer(images, many=True)
+
+        elif product_type == "game_money":
+            game_money_product = GameMoneyProduct.objects.filter(pk = product_id)
+            serializer = GameMoneyProductSerializer(game_money_product, many = True)
+
+            images = ProductImage.objects.filter(game_money_product = product_id)
+            images_serializer = ProductImageSerializer(images, many=True)
+        else:
+            return
+        
+        return Response({
+            "product_data" : serializer.data,
+            "image_data" : images_serializer.data,
+        }, status=status.HTTP_200_OK)

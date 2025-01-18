@@ -27,8 +27,17 @@ def home_page(request):
         "item_data" : items["item_data"],
         "game_money_data" : items["game_money_data"]
     }
+
+    pp = "http://127.0.0.1:8001/products/get-product-info/item/37"
+    rr = requests.get(pp)
+    test = rr.json()
     
-    return render(request,"item_trade_page/home_page.html",{"user" : request.user,"table_data":table_data})
+    test_data = {
+        "product_data" : test["product_data"],
+        "image_data" : test["image_data"]
+    }
+    
+    return render(request,"item_trade_page/home_page.html",{"user" : request.user,"table_data":table_data,"test_data":test_data})
 
 def login_page(request):
     if request.method == "POST":
@@ -110,4 +119,10 @@ def create_product_view(request):
 
     return render(request, 'item_trade_page/create_product.html', {'form': form})
 
+@login_required # 로그인이 필요한 뷰
+def product_info_page(request,product_type,product_id):
+    respone = requests.get(API_PATH+"products/get-product-info/{}/{}".format(product_type,product_id))
+    product_data = respone.json()
+    print(product_data)
 
+    return render(request, "item_trade_page/product_info_page.html",product_data)
