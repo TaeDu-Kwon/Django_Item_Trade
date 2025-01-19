@@ -15,16 +15,18 @@ class ProductSerializer(serializers.ModelSerializer):
 class AccountProductSerializer(ProductSerializer):
     account_class = serializers.CharField()
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    game = serializers.SerializerMethodField()
+    seller = serializers.SerializerMethodField()
     
-    # 값을 넣을 때 id말고 이름으로 넣기위해 제작
-    game = serializers.SlugRelatedField(
-        queryset=Game.objects.all(),
-        slug_field="name"  # 출력할 필드
-    )
-    seller = serializers.SlugRelatedField(
-        queryset=User.objects.all(),
-        slug_field="username"  # 출력할 필드
-    )
+    def get_game(self, obj):
+        if self.context.get("view_type") == "read":
+            return obj.game.name  # 게임 이름 출력
+        return obj.game.id  # 기본 ID 반환
+
+    def get_seller(self, obj):
+        if self.context.get("view_type") == "read":
+            return obj.seller.username  # 판매자 이름 출력
+        return obj.seller.id  # 기본 ID 반환
 
     class Meta:
         model = AccountProduct
@@ -35,14 +37,18 @@ class ItemProductSerializer(ProductSerializer):
     quantity = serializers.IntegerField()
     price_per_item = serializers.DecimalField(max_digits=10, decimal_places=2)
 
-    # game = serializers.SlugRelatedField(
-    #     queryset=Game.objects.all(),
-    #     slug_field="name"  # 출력할 필드
-    # )
-    # seller = serializers.SlugRelatedField(
-    #     queryset=User.objects.all(),
-    #     slug_field="username"  # 출력할 필드
-    # )
+    game = serializers.SerializerMethodField()
+    seller = serializers.SerializerMethodField()
+    
+    def get_game(self, obj):
+        if self.context.get("view_type") == "read":
+            return obj.game.name  # 게임 이름 출력
+        return obj.game.id  # 기본 ID 반환
+
+    def get_seller(self, obj):
+        if self.context.get("view_type") == "read":
+            return obj.seller.username  # 판매자 이름 출력
+        return obj.seller.id  # 기본 ID 반환
 
     class Meta:
         model = ItemProduct
@@ -51,15 +57,19 @@ class ItemProductSerializer(ProductSerializer):
 class GameMoneyProductSerializer(ProductSerializer):
     total_amount = serializers.IntegerField()
     total_price = serializers.DecimalField(max_digits=10,decimal_places=2)
+
+    game = serializers.SerializerMethodField()
+    seller = serializers.SerializerMethodField()
     
-    game = serializers.SlugRelatedField(
-        queryset=Game.objects.all(),
-        slug_field="name"  # 출력할 필드
-    )
-    seller = serializers.SlugRelatedField(
-        queryset=User.objects.all(),
-        slug_field="username"  # 출력할 필드
-    )
+    def get_game(self, obj):
+        if self.context.get("view_type") == "read":
+            return obj.game.name  # 게임 이름 출력
+        return obj.game.id  # 기본 ID 반환
+
+    def get_seller(self, obj):
+        if self.context.get("view_type") == "read":
+            return obj.seller.username  # 판매자 이름 출력
+        return obj.seller.id  # 기본 ID 반환
 
     class Meta:
         model = GameMoneyProduct

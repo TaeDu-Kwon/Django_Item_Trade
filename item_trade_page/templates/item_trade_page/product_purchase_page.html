@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css/pay.css' %}" />
+    <title>Document</title>
+</head>
+<body>
+    <h1>Bying Product</h1>
+    <div class = "product-container">
+        <div class = "product-card">
+            <h2>" url 'shopping_mall:pay_product' cart_item.id "></h2>
+            <form method="post" action="">
+                {% csrf_token %}
+                <h2>구매자정보</h2>
+                <div class = "product-card-card">
+                    <div class = "product-card--group">
+                        <label for="name" >이름 : </label>
+                        {{ user.username }}
+                    </div>
+                    <div class = "product-card--group">
+                        <label for="email" >이메일 : </label>
+                        {{ user.email }}
+                    </div>
+                </div>
+                <h2>상품정보</h2>
+                <div class = "product-card-card">
+                    <div class = "product-card--group">
+                        <label for="product_name" >이름: </label>
+                        {{product_data.0.item_name}}
+                    </div>
+                    <div class = "product-card--group">
+                        <label for="quantity" >수량: </label>
+                        {{ product_data.0.quantity }}
+                    </div>
+                    <div class = "product-card--group">
+                        <label for="product_price" >가격: </label>
+                        {{ product_data.0.price_per_item }}
+                    </div>
+                </div>
+                <br><br>
+                <div class="buttons">
+                    <button type="submit" name="action" value="purchase" class="button">결제하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

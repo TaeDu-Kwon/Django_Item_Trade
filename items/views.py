@@ -31,7 +31,10 @@ class CreateProductView(generics.CreateAPIView):
         if serializer.is_valid():
             user_id = request.data.get("seller")
             seller = User.objects.get(pk = int(user_id))
-            product_serializer = serializer.save(seller=seller)
+
+            game_id = request.data.get("game")
+            game = Game.objects.get(pk = int(game_id))
+            product_serializer = serializer.save(seller=seller, game = game)
             
             images = request.FILES.getlist('product_image')
 
@@ -53,14 +56,15 @@ class CreateProductView(generics.CreateAPIView):
 class ProductViewsets(viewsets.ModelViewSet):
     
     def get_recently_create_item(self, request, *args, **kwargs):
-
+        # 매인 페이지 최신 아이템 정보
         account_products = AccountProduct.objects.order_by("-created_at")[:5]
         item_products = ItemProduct.objects.order_by("-created_at")[:5]
         game_money_products = GameMoneyProduct.objects.order_by("-created_at")[:5]
 
-        account_serializer = AccountProductSerializer(account_products, many = True)
-        item_serializer = ItemProductSerializer(item_products, many = True)
-        game_money_serializer = GameMoneyProductSerializer(game_money_products, many = True)
+        context = {"view_type": "read"}
+        account_serializer = AccountProductSerializer(account_products, many = True, context=context)
+        item_serializer = ItemProductSerializer(item_products, many = True, context=context)
+        game_money_serializer = GameMoneyProductSerializer(game_money_products, many = True, context=context)
 
         return Response({
             "account_data" : account_serializer.data,
@@ -100,3 +104,4 @@ class ProductViewsets(viewsets.ModelViewSet):
             "product_data" : serializer.data,
             "image_data" : images_serializer.data,
         }, status=status.HTTP_200_OK)
+    

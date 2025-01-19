@@ -104,7 +104,7 @@
                     </div>
                     <p><strong>총 금액:</strong> <span id="total-price">{{ product_data.0.price_per_item }}</span>원</p>
                     <button class="btn btn-primary">장바구니</button>
-                    <button class="btn btn-success">구매</button>
+                    <a href="{% url 'item_trade:product_purchase' product_data.0.product_type product_data.0.id %}"><button class="btn btn-success">구매</button></a>
                 </div>
             </div>
 
