@@ -23,7 +23,8 @@ class Product(models.Model):
     product_type = models.CharField(max_length=20, choices=PRODUCT_TYPE_CHOICES) # 판매품 종류
     description = models.TextField(blank=True, null=True) # 설명
     created_at = models.DateTimeField(auto_now_add=True) # 생성 날짜
-
+    sold_out = models.BooleanField(default=False)
+    
     class Meta: 
         # 추상 모델 ( 실제 데이터베이스 테이블로 생성되지 않는 기반 클래스 주로 공통 필드와 메서드를 다른 모델에서 재사용하기 위해서 정의한다. )
         abstract = True

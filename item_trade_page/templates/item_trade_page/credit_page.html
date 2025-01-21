@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>크레딧 구매</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: rgb(158, 158, 158);
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 20px;
+            color: #555;
+        }
+        .container {
+            display: inline-block;
+            text-align: left;
+            max-width: 500px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .total {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>크레딧 구매</h1>
+    <p>플랫폼 모든 콘텐츠에 사용하는 크레딧을 구매하세요!. 최소 구매 금액은 5크레딧입니다. 1 크레딧 1000원 입니다.</p>
+    <label for="credit">현재 {{user_credit.user.username}}님의 크레딧 : {{user_credit.credit}}</label>
+
+    
+
+    <form method="post" action="{% url 'item_trade:kakaopay' user.username %}">
+        {% csrf_token %}
+        <div class="container">
+            <div class="input-group">
+                <label for="credit">크레딧 수</label>
+                <input type="number" id="credit" name="credit" min="5" placeholder="크레딧 수를 입력하세요" oninput="calculateTotal()">
+            </div>
+            <div class="total">총계: <span id="total">0</span> </div>
+            <button class="btn">크레딧 구매</button>
+        </div>
+    </form>
+
+    <script>
+        function calculateTotal() {
+            const creditInput = document.getElementById('credit').value;
+            const totalElement = document.getElementById('total');
+            const creditCount = parseInt(creditInput, 10) || 0;
+            const total = creditCount * 1000; // 1 크레딧당 1000원
+            totalElement.textContent = total.toLocaleString() + ' 원';
+        }
+    </script>
+</body>
+</html>

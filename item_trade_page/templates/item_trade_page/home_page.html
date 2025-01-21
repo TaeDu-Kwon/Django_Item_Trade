@@ -107,7 +107,7 @@
             <div class="buttons">
                 <a href="{% url 'item_trade:logout' %}" style="margin-left: 10px;">{{user.username}}</a>
                 <a href="{% url 'item_trade:create_product' %}"><button>상품 등록</button></a>
-                <a href="#"><button>장바구니</button></a>
+                <a href="{% url 'item_trade:credit_page' user.id %}"><button>크래딧 충전</button></a>
             </div>
         {%endif%}
     </header>
@@ -145,7 +145,7 @@
             </thead>
             <tbody>
                 {% for account in table_data.account_data %}
-                    <tr>
+                    <tr onclick="location.href='{% url 'item_trade:product_info' account.product_type account.id %}'" style="cursor: pointer;">
                         <th>{{account.game}}</th>
                         <th>{{account.title}}</th>
                         <th>{{account.account_class}}</th>
@@ -195,7 +195,7 @@
             </thead>
             <tbody>
                 {% for game_money in table_data.game_money_data %}
-                    <tr>
+                    <tr onclick="location.href='{% url 'item_trade:product_info' game_money.product_type game_money.id %}'" style="cursor: pointer;">
                         <th>{{game_money.game}}</th>
                         <th>{{game_money.title}}</th>
                         <th>{{game_money.total_amount}}</th>

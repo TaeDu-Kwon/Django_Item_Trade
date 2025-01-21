@@ -10,8 +10,9 @@
     <h1>Bying Product</h1>
     <div class = "product-container">
         <div class = "product-card">
-            <h2>" url 'shopping_mall:pay_product' cart_item.id "></h2>
-            <form method="post" action="">
+
+            <form method="post" action="{% url 'item_trade:buy_the_product' %}">
+            
                 {% csrf_token %}
                 <h2>구매자정보</h2>
                 <div class = "product-card-card">
@@ -24,20 +25,52 @@
                         {{ user.email }}
                     </div>
                 </div>
+
                 <h2>상품정보</h2>
                 <div class = "product-card-card">
-                    <div class = "product-card--group">
-                        <label for="product_name" >이름: </label>
-                        {{product_data.0.item_name}}
-                    </div>
-                    <div class = "product-card--group">
-                        <label for="quantity" >수량: </label>
-                        {{ product_data.0.quantity }}
-                    </div>
-                    <div class = "product-card--group">
-                        <label for="product_price" >가격: </label>
-                        {{ product_data.0.price_per_item }}
-                    </div>
+                    {% if product_data.0.product_type == "account" %}
+                        <div class = "product-card--group">
+                            <label for="product_name" >직업: </label>
+                            {{product_data.0.account_class}}
+                        </div>
+                        <div class = "product-card--group">
+                            <label for="quantity" >수량: 1</label>
+                        </div>
+                        <div class = "product-card--group">
+                            <label for="product_price" >가격: </label>
+                            {{ product_data.0.price }}
+                        </div>
+                    {% elif product_data.0.product_type == "item" %}
+                        <div class = "product-card--group">
+                            <label for="product_name" >이름: </label>
+                            {{product_data.0.item_name}}
+                        </div>
+                        <div class = "product-card--group">
+                            <label for="quantity" >수량: </label>
+                            {{ product_data.0.quantity }}
+                        </div>
+                        <div class = "product-card--group">
+                            <label for="product_price" >가격: </label>
+                            {{ product_data.0.price_per_item }}
+                        </div>
+                    {% elif product_data.0.product_type == "game_money" %}
+                        <div class = "product-card--group">
+                            <label for="product_name" >게임: </label>
+                            {{product_data.0.game}}
+                        </div>
+                        <div class = "product-card--group">
+                            <label for="quantity" >총 게임 머니: </label>
+                            {{ product_data.0.total_amount }}
+                        </div>
+                        <div class = "product-card--group">
+                            <label for="product_price" >가격: </label>
+                            {{ product_data.0.total_price }}
+                        </div>
+                    {% else %}
+                        <div class="product-info">
+                            <p>상품 정보를 불러올 수 없습니다.</p>
+                        </div>
+                    {% endif %}
                 </div>
                 <br><br>
                 <div class="buttons">

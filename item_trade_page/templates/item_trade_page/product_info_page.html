@@ -49,64 +49,70 @@
             margin-top: 20px;
         }
     </style>
-    <script>
-        function updateQuantity(maxQuantity) {
-            const quantityInput = document.getElementById('quantity');
-            let currentQuantity = parseInt(quantityInput.value);
-
-            if (currentQuantity < 1) {
-                quantityInput.value = 1;
-            } else if (currentQuantity > maxQuantity) {
-                quantityInput.value = maxQuantity;
-            }
-        }
-
-        function incrementQuantity(maxQuantity) {
-            const quantityInput = document.getElementById('quantity');
-            let currentQuantity = parseInt(quantityInput.value);
-            if (currentQuantity < maxQuantity) {
-                quantityInput.value = currentQuantity + 1;
-            }
-        }
-
-        function decrementQuantity() {
-            const quantityInput = document.getElementById('quantity');
-            let currentQuantity = parseInt(quantityInput.value);
-            if (currentQuantity > 1) {
-                quantityInput.value = currentQuantity - 1;
-            }
-        }
-    </script>
 </head>
 <body>
     <div class="container mt-5">
         <div class="product-container">
             <h2>{{ product_data.0.title }}</h2>
-            <p>{{ product_data.0.created_at|date:"Y-m-d H:i:s" }}</p>
             <hr>
 
-            <!-- 상품 정보 -->
-            <div class="product-info row">
-                <div class="col-md-6">
-                    <h5>물품 정보</h5>
-                    <p><strong>게임:</strong> {{ product_data.0.game }}</p>
-                    <p><strong>아이템:</strong> {{ product_data.0.item_name }}</p>
-                    <p><strong>수량:</strong> {{ product_data.0.quantity }}</p>
-                    <p><strong>상세 가격:</strong> {{ product_data.0.price_per_item }}원</p>
+            <!-- 상품 타입에 따른 분기 -->
+            {% if product_data.0.product_type == "account" %}
+                <!-- 계정 상품 -->
+                <div class="product-info row">
+                    <div class="col-md-6">
+                        <h5>물품 정보</h5>
+                        <p><strong>게임:</strong> {{ product_data.0.game }}</p>
+                        <p><strong>직업:</strong> {{ product_data.0.account_class }}</p>
+                        <p><strong>수량:</strong> 1</p>
+                        <p><strong>상세 가격:</strong> {{ product_data.0.price }}원</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>총 금액:</strong> <span id="total-price">{{ product_data.0.price }}</span>원</p>
+                        <button class="btn btn-primary">장바구니</button>
+                        <a href="{% url 'item_trade:product_purchase' product_data.0.product_type product_data.0.id %}"><button class="btn btn-success">구매</button></a>
+                    </div>
                 </div>
 
-                <!-- 수량 선택 및 총 금액 -->
-                <div class="col-md-6">
-                    <div class="quantity-box">
-                        <button type="button" class="btn btn-outline-secondary" onclick="decrementQuantity()">-</button>
-                        <input type="number" id="quantity" value="1" min="1" max="{{ product_data.0.quantity }}" onchange="updateQuantity({{ product_data.0.quantity }})">
-                        <button type="button" class="btn btn-outline-secondary" onclick="incrementQuantity({{ product_data.0.quantity }})">+</button>
+            {% elif product_data.0.product_type == "item" %}
+                <!-- 아이템 상품 -->
+                <div class="product-info row">
+                    <div class="col-md-6">
+                        <h5>물품 정보</h5>
+                        <p><strong>게임:</strong> {{ product_data.0.game }}</p>
+                        <p><strong>아이템:</strong> {{ product_data.0.item_name }}</p>
+                        <p><strong>수량:</strong> {{ product_data.0.quantity }} </p>
+                        <p><strong>상세 가격:</strong> {{ product_data.0.price_per_item }}원</p>
                     </div>
-                    <p><strong>총 금액:</strong> <span id="total-price">{{ product_data.0.price_per_item }}</span>원</p>
-                    <button class="btn btn-primary">장바구니</button>
-                    <a href="{% url 'item_trade:product_purchase' product_data.0.product_type product_data.0.id %}"><button class="btn btn-success">구매</button></a>
+                    <div class="col-md-6">
+                        <p><strong>총 금액:</strong> <span id="total-price">{{ product_data.0.price_per_item }}</span>원</p>
+                        <button class="btn btn-primary">장바구니</button>
+                        <a href="{% url 'item_trade:product_purchase' product_data.0.product_type product_data.0.id %}"><button class="btn btn-success">구매</button></a>
+                    </div>
                 </div>
-            </div>
+
+            {% elif product_data.0.product_type == "game_money" %}
+                <!-- 게임머니 상품 -->
+                <div class="product-info row">
+                    <div class="col-md-6">
+                        <h5>물품 정보</h5>
+                        <p><strong>게임:</strong> {{ product_data.0.game }}</p>
+                        <p><strong>총 게임 머니:</strong> {{ product_data.0.total_amount }}</p>
+                        <p><strong>총 금액:</strong> {{ product_data.0.total_price }}원</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>총 금액:</strong> <span id="total-price">{{ product_data.0.total_price }}</span>원</p>
+                        <button class="btn btn-primary">장바구니</button>
+                        <a href="{% url 'item_trade:product_purchase' product_data.0.product_type product_data.0.id %}"><button class="btn btn-success">구매</button></a>
+                    </div>
+                </div>
+
+            {% else %}
+                <!-- 상품 타입 미지정 -->
+                <div class="product-info">
+                    <p>상품 정보를 불러올 수 없습니다.</p>
+                </div>
+            {% endif %}
 
             <!-- 설명 -->
             <div class="description-box">

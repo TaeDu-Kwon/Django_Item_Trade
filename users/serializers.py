@@ -4,6 +4,7 @@ from rest_framework.validators import UniqueValidator # 이메일 중복 방지�
 from django.contrib.auth.password_validation import validate_password # Django의 기본 pw 검증 도구
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
+from .models import UserCredit
 
 class SignUpSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required = True, validators = [UniqueValidator(queryset=User.objects.all())])
@@ -30,6 +31,8 @@ class SignUpSerializer(serializers.ModelSerializer):
         )
         user.set_password(validated_data["password"])
         user.save()
+        credit = UserCredit.objects.create(user = user, credit = 0)
+
         token = Token.objects.create(user=user)
         return user
 
@@ -47,3 +50,8 @@ class LoginSerializer(serializers.ModelSerializer):
             token = Token.objects.get(user=user)
             return token
         raise serializers.ValidationError({"error" : "Unable to log in with provided credentials"})
+
+class UserCreditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserCredit
+        fields = "__all__"

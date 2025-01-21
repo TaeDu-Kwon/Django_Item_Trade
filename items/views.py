@@ -6,6 +6,11 @@ from rest_framework import viewsets, generics, status
 from .models import Game, Product, AccountProduct, ItemProduct, GameMoneyProduct, ProductImage
 from .serializers import GameSerializer, ProductSerializer, AccountProductSerializer, ItemProductSerializer, GameMoneyProductSerializer, ProductImageSerializer
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
+import json
+
+from users.models import UserCredit
+from users.serializers import UserCreditSerializer
 
 # 게임 생성성
 class CreateGameView(generics.CreateAPIView):
@@ -57,9 +62,9 @@ class ProductViewsets(viewsets.ModelViewSet):
     
     def get_recently_create_item(self, request, *args, **kwargs):
         # 매인 페이지 최신 아이템 정보
-        account_products = AccountProduct.objects.order_by("-created_at")[:5]
-        item_products = ItemProduct.objects.order_by("-created_at")[:5]
-        game_money_products = GameMoneyProduct.objects.order_by("-created_at")[:5]
+        account_products = self.get_recent_products(AccountProduct)
+        item_products = self.get_recent_products(ItemProduct)
+        game_money_products = self.get_recent_products(GameMoneyProduct)
 
         context = {"view_type": "read"}
         account_serializer = AccountProductSerializer(account_products, many = True, context=context)
@@ -71,37 +76,63 @@ class ProductViewsets(viewsets.ModelViewSet):
             "item_data" : item_serializer.data,
             "game_money_data" : game_money_serializer.data
         },status=status.HTTP_200_OK)
+    
+    def get_recent_products(self,model):
+        return model.objects.filter(sold_out=False).order_by("-created_at")[:5]
 
-    def get_product_info(self,request, *args, **kwargs):
+    def get_product_info(self,request, *args, **kwargs): 
         # 상품 상세 페이지지
         product_id = kwargs.get("product_id")
         product_type = kwargs.get("product_type")
+        
+        product_model_map = {
+            "account" : (AccountProduct, AccountProductSerializer,"account_product"),
+            "item" : (ItemProduct, ItemProductSerializer,"item_product"),
+            "game_money" : (GameMoneyProduct, GameMoneyProductSerializer,"game_money_product")
+        }
 
-        if product_type == "account":
-            account_product = AccountProduct.objects.filter(pk=product_id)
-            images = ProductImage.objects.filter(account_product = product_id)
+        if not product_type in product_model_map:
+            return Response({"error": "Invalid product type"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        model, ser_class, image_field = product_model_map[product_type]
 
-            serializer = AccountProductSerializer(account_product, many = True)
-            images_serializer = ProductImageSerializer(images, many=True)
+        product = model.object.filter(pk = product_id)
+        serializer = ser_class(product, many= True, context={"view_type":"read"})
 
-        elif product_type == "item":
-            item_product = ItemProduct.objects.filter(pk = product_id)
-            images = ProductImage.objects.filter(item_product = product_id)
-
-            serializer = ItemProductSerializer(item_product, many = True)
-            images_serializer = ProductImageSerializer(images, many=True)
-
-        elif product_type == "game_money":
-            game_money_product = GameMoneyProduct.objects.filter(pk = product_id)
-            serializer = GameMoneyProductSerializer(game_money_product, many = True)
-
-            images = ProductImage.objects.filter(game_money_product = product_id)
-            images_serializer = ProductImageSerializer(images, many=True)
-        else:
-            return
+        images = ProductImage.objects.filter(**{image_field:product_id}) #field 값이 다르기 때문에 ** 동적으로 필터링을 넣어준다.
+        images_serializer = ProductImageSerializer(images, many=True)
         
         return Response({
             "product_data" : serializer.data,
             "image_data" : images_serializer.data,
         }, status=status.HTTP_200_OK)
     
+    
+    def buy_the_product(self,request,*args,**kwargs):# 상품 구매
+        product_id = request.data.get("product_id")
+        product_type = request.data.get("product_type")
+        user = request.data.get("user_id")
+        
+        if product_type == "account":
+            product = get_object_or_404(AccountProduct, id = product_id)
+            price = int(str(product.price).split(".00")[0])
+        elif product_type == "item":
+            product = get_object_or_404(ItemProduct, id = product_id)
+            price = int(product.price_per_item.split(".00")[0]) # 수량의 곱 으로 계산할 생각
+        elif product_type == "game_money":
+            product = get_object_or_404(GameMoneyProduct, id = product_id)
+            price = int(product.total_price.split(".00")[0])
+        else:
+            return Response({"error": "Invalid product type"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_credit = get_object_or_404(UserCredit, user = user)
+  
+        if user_credit.credit < price:
+            return Response({"error": "Insufficient credit"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user_credit.credit -= price
+        user_credit.save()
+        product.sold_out = True
+        product.save()
+
+        return Response({"success": "Product purchased successfully"}, status=status.HTTP_200_OK)

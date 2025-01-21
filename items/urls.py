@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = "products"
+
 urlpatterns = [
     path('game/',views.CreateGameView.as_view()),
     path('create/', views.CreateProductView.as_view(), name='create_product'),
@@ -9,7 +11,10 @@ urlpatterns = [
     })),
     path("get-product-info/<str:product_type>/<int:product_id>/",views.ProductViewsets.as_view({
         "get" : "get_product_info"
-    }))
+    })),
+    path("buy-product/",views.ProductViewsets.as_view({
+        "post" : "buy_the_product"
+    }),name='buy_the_product'),
 ]
 
 
