@@ -15,6 +15,8 @@ urlpatterns = [
     path("buy-product/",views.ProductViewsets.as_view({
         "post" : "buy_the_product"
     }),name='buy_the_product'),
+    path("purchase-record/",views.PurchaseRecordViewset.as_view({'get': 'list'}), name='purchase_record'),
+    path('purchases/<int:pk>/', views.PurchaseRecordViewset.as_view({'get': 'list'}), name='purchase-detail'),
 ]
 
 

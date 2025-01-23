@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Game, Product, AccountProduct, ItemProduct, GameMoneyProduct, ProductImage
+from .models import Game, Product, AccountProduct, ItemProduct, GameMoneyProduct, ProductImage, PurchaseRecord
 from django.contrib.auth.models import User
 
 class GameSerializer(serializers.ModelSerializer):
@@ -79,3 +79,32 @@ class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
         fields = "__all__"
+
+class PurchaseRecordSerializer(serializers.ModelSerializer):
+    product_image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PurchaseRecord
+        fields = [
+            "id",
+            "user",
+            "product_title",
+            "product_type",
+            "price",
+            "quantity",
+            "purchased_at",
+            "product_image",
+        ]
+    def get_product_image(self, obj):
+        # 상품 유형에 따라 이미지를 동적으로 가져오기
+        if obj.product_type == "account":
+            image = ProductImage.objects.filter(account_product_id=obj.product_id).first()
+        elif obj.product_type == "item":
+            image = ProductImage.objects.filter(item_product_id=obj.product_id).first()
+        elif obj.product_type == "game_money":
+            image = ProductImage.objects.filter(game_money_product_id=obj.product_id).first()
+        else:
+            return None
+        
+        # 이미지가 존재하면 URL 반환
+        return image.product_image.url if image else None

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주문 목록</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: rgb(158, 158, 158);
+        }
+        .header {
+            background-color: #e3f2fd;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .order-date {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .order-item img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+        .order-details {
+            flex: 1;
+        }
+        .order-details h2 {
+            font-size: 14px;
+            margin: 0 0 5px;
+        }
+        .order-details p {
+            margin: 0;
+            color: #555;
+        }
+        .order-actions {
+            text-align: center;
+        }
+        .order-actions button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .order-actions button:hover {
+            background-color: #0056b3;
+        }
+        .view-details {
+            text-align: right;
+            margin-top: 10px;
+        }
+        .view-details a {
+            text-decoration: none;
+            color: #007bff;
+            font-size: 14px;
+        }
+        .view-details a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>주문 목록</h1>
+    </div>
+
+    <div class="container">
+        <div class="order-date">개인 정보</div>
+
+        <div class="order-item">
+            <div class="order-details">
+                <h2>나의 이름은 : {{user.username}}</h2>
+                <h2>나의 이메일 : {{user.email}}</h2>
+                <h2>나의 크레딧 : {{user_credit.credit}}</h2>
+            </div>
+            <div class="order-actions">
+                <a href="{% url 'item_trade:credit_page' user.id %}"><button>크레딧 충전</button></a>
+            </div>
+        </div>
+        <div class="view-details"></div>
+    </div>
+
+    <br>
+   
+    {% if purchase_record.detail != "No PurchaseRecord matches the given query."%}
+        {% for product in purchase_record %}
+            <div class="container">
+                <div class="order-date">{{ product.purchased_at|date:'Y-m-d H:i' }}</div>
+                <div class="order-date">{{ product.purchased_at }}</div>
+                <div class="order-item">
+                    <img src="{{ product.product_image }}" alt="상품 이미지">
+                    <div class="order-details">
+                        <h2>{{ product.product_title }}</h2>
+                        <p>{{ product.price }} · {{ product.quantity }}개</p>
+                    </div>
+                    <div class="order-actions">
+                        <button>장바구니 담기</button>
+                    </div>
+                </div>
+                <div class="view-details">
+                    <a href="#">주문 상세보기</a>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class = "container">
+            <div class="no-products">
+                <p>구매한 상품이 없습니다.</p>
+            </div>  
+        </div>
+    {% endif %}
+</body>
+</html>

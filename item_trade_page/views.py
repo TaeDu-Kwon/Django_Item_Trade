@@ -16,13 +16,16 @@ from users.models import UserCredit
 
 API_PATH = "http://127.0.0.1:8001/"
 
+# ---------------------------------------- 매인 페이지 관련 ------------------------------------------- #
 def home_page(request):
+    # 매인 페이지 관련 함수
+    # item app에서 최근 등록된 5개 상품 찾아와 보여주도록 설정정
     path = "http://127.0.0.1:8001/products/get-recently-create-item"
     items = {}
     
     res = requests.get(path)
     items = res.json()
-    #print(items)
+    
     table_data = {
         "account_data" : items["account_data"],
         "item_data" : items["item_data"],
@@ -32,12 +35,14 @@ def home_page(request):
     return render(request,"item_trade_page/home_page.html",{"user" : request.user,"table_data":table_data})
 
 def login_page(request):
+    # 로그인 페이지 관련 함수
     if request.method == "POST":
         serializer = LoginSerializer(data = request.POST)
 
         if serializer.is_valid():
             token = serializer.validated_data
             user = User.objects.get(auth_token = token)
+            # 이메일로 로그인하기 위해서 백앤드 부분을 제작함함
             user.backend = 'users.backends.EmailAuthBackend' # 제작한 백앤드 설정
             login(request, user)
             return redirect("item_trade:home_page")
@@ -49,6 +54,7 @@ def login_page(request):
     return render(request,"item_trade_page/login_page.html")
 
 def signup_page(request):
+    # 회원가입 페이지 관련 함수수
     if request.method == "POST":
         serializer = SignUpSerializer(data = request.POST)
         
@@ -63,12 +69,17 @@ def signup_page(request):
     
     return render(request, "item_trade_page/signup_page.html")
 
+@login_required # 로그인이 필요한 뷰
 def logout_view(request):
+    # 로그아웃
     logout(request)
     return redirect("item_trade:home_page")
 
+# ---------------------------------------- 상품 등록 관련 ------------------------------------------- #
+
 @login_required # 로그인이 필요한 뷰
 def create_product_view(request):
+    # 상품 등록 관련 함수
     form = ProductForm()  # 기본 폼
 
     if request.method == "POST":
@@ -105,32 +116,36 @@ def create_product_view(request):
                 files.append(('product_image', image))
 
         respone = requests.post(API_PATH+"products/create/",data=data, files=files)
-        #print(respone.json())
+        
         if respone.status_code == 201:
             return redirect("item_trade:home_page")  
 
     return render(request, 'item_trade_page/create_product.html', {'form': form})
 
+# ---------------------------------------- 상품 상세페이지 및 상품 구매매 관련 ------------------------------------------- #
 @login_required # 로그인이 필요한 뷰
 def product_info_page(request,product_type,product_id):
+    # 상품 상세페이지 관련 함수
     respone = requests.get(API_PATH+"products/get-product-info/{}/{}".format(product_type,product_id))
     product_data = respone.json()
-    #print(product_data)
+    
 
     return render(request, "item_trade_page/product_info_page.html",product_data)
 
 @login_required # 로그인이 필요한 뷰
 def product_purchase_page(request,product_type,product_id):
+    # 결제 페이지 관련 함수 
     respone = requests.get(API_PATH+"products/get-product-info/{}/{}".format(product_type,product_id))
     product_data = respone.json()
 
-    # 결제 페이지에서 데이터 사용하기 위해서 session에 저장한다
+    # 최종 결제 함수에서 데이터 사용하기 위해서 session에 저장한다
     request.session["product_data"] = product_data 
 
     return render(request, "item_trade_page/product_purchase_page.html",product_data)
 
 @login_required # 로그인이 필요한 뷰
-def buy_the_product(request): # 상품 최종 결제 함수수
+def buy_the_product(request): 
+    # 상품 최종 결제 함수
     if request.method == "POST":
         product_data = request.session.get("product_data")["product_data"][0]
         product_id = product_data["id"]
@@ -154,16 +169,20 @@ def buy_the_product(request): # 상품 최종 결제 함수수
         
 @login_required # 로그인이 필요한 뷰
 def payment_fail(request):
+    # 최종 결제할 때 크레딧 부족으로 실패할 경우 보여주기 위한 페이지지
     return render(request, "item_trade_page/payment_fail.html", {"error": "사용자 크레딧이 부족합니다."})
 
+# ---------------------------------------- 크레딧 결제 관련 ------------------------------------------- #
 @login_required # 로그인이 필요한 뷰
 def credit_page(request,user_id):
+    # 크레딧 충전 페이지
     user_credit = UserCredit.objects.get(user__id= user_id)
 
     return render(request, "item_trade_page/credit_page.html",{"user_credit":user_credit})
 
 @login_required # 로그인이 필요한 뷰
 def kakaopay(request,user_name):
+    # 크레딧 충전을 하기위해 카카오페이 api를 사용하여 충전하도록 제작작
     if request.method == 'POST':
         credit = int(request.POST.get('credit', 0))
 
@@ -231,3 +250,11 @@ def payFail(request):
     return render(request, 'payFail.html')
 def payCancel(request):
     return render(request, 'payCancel.html')
+
+def my_page(request):
+    # 마이페이지 관련 함수
+    res = requests.get(API_PATH + "products/purchases/{}".format(request.user.id))
+    user_credit = UserCredit.objects.get(user__id= request.user.id)
+    purchase_record = res.json()
+
+    return render(request, "item_trade_page/my_page.html",{"user":request.user,"purchase_record" : purchase_record, "user_credit" : user_credit})

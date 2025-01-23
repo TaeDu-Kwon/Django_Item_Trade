@@ -105,8 +105,9 @@
             </div>
         {% else %}
             <div class="buttons">
-                <a href="{% url 'item_trade:logout' %}" style="margin-left: 10px;">{{user.username}}</a>
+                <a href="{% url 'item_trade:logout' %}" style="margin-left: 10px;">로그아웃</a>
                 <a href="{% url 'item_trade:create_product' %}"><button>상품 등록</button></a>
+                <a href="{% url 'item_trade:my_page' %}"><button>마이 페이지</button></a>
                 <a href="{% url 'item_trade:credit_page' user.id %}"><button>크래딧 충전</button></a>
             </div>
         {%endif%}

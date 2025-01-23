@@ -56,3 +56,24 @@ class ProductImage(models.Model):
     item_product = models.ForeignKey(ItemProduct,blank=True,null=True, on_delete=models.CASCADE)
     game_money_product = models.ForeignKey(GameMoneyProduct,blank=True, null=True,on_delete=models.CASCADE)
     product_image = models.ImageField(upload_to="product_image/")
+
+class PurchaseRecord(models.Model):
+    PRODUCT_TYPE_CHOICES = [
+        ('account',"Account"),
+        ('item',"Item"),
+        ('game_money','Game Money')
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product_id = models.PositiveBigIntegerField()
+    product_title = models.CharField(max_length=150)
+    product_type = models.CharField(max_length=20)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField(default=1)  
+    purchased_at = models.DateTimeField(auto_now_add=True)  
+
+    class Meta:
+        ordering = ["-purchased_at"] # 최신 구매 순으로 정렬한다.
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product_title} ({self.product_type})"

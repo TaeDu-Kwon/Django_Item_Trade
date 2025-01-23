@@ -3,8 +3,8 @@ from django.shortcuts import render
 # Create your views here.
 from rest_framework.response import Response
 from rest_framework import viewsets, generics, status
-from .models import Game, Product, AccountProduct, ItemProduct, GameMoneyProduct, ProductImage
-from .serializers import GameSerializer, ProductSerializer, AccountProductSerializer, ItemProductSerializer, GameMoneyProductSerializer, ProductImageSerializer
+from .models import Game, Product, AccountProduct, ItemProduct, GameMoneyProduct, ProductImage, PurchaseRecord
+from .serializers import GameSerializer, ProductSerializer, AccountProductSerializer, ItemProductSerializer, GameMoneyProductSerializer, ProductImageSerializer, PurchaseRecordSerializer
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 import json
@@ -96,7 +96,7 @@ class ProductViewsets(viewsets.ModelViewSet):
         
         model, ser_class, image_field = product_model_map[product_type]
 
-        product = model.object.filter(pk = product_id)
+        product = model.objects.filter(pk = product_id)
         serializer = ser_class(product, many= True, context={"view_type":"read"})
 
         images = ProductImage.objects.filter(**{image_field:product_id}) #field 값이 다르기 때문에 ** 동적으로 필터링을 넣어준다.
@@ -112,16 +112,18 @@ class ProductViewsets(viewsets.ModelViewSet):
         product_id = request.data.get("product_id")
         product_type = request.data.get("product_type")
         user = request.data.get("user_id")
+        quantity = 1
         
         if product_type == "account":
             product = get_object_or_404(AccountProduct, id = product_id)
             price = int(str(product.price).split(".00")[0])
         elif product_type == "item":
             product = get_object_or_404(ItemProduct, id = product_id)
-            price = int(product.price_per_item.split(".00")[0]) # 수량의 곱 으로 계산할 생각
+            price = int(str(product.price_per_item).split(".00")[0]) # 수량의 곱 으로 계산할 생각
+            quantity = product.quantity
         elif product_type == "game_money":
             product = get_object_or_404(GameMoneyProduct, id = product_id)
-            price = int(product.total_price.split(".00")[0])
+            price = int(str(product.total_price).split(".00")[0])
         else:
             return Response({"error": "Invalid product type"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -132,7 +134,26 @@ class ProductViewsets(viewsets.ModelViewSet):
         
         user_credit.credit -= price
         user_credit.save()
+
         product.sold_out = True
         product.save()
 
+        PurchaseRecord.objects.create(
+            user = User.objects.get(pk = user),
+            product_id = product.id,
+            product_title = product.title,
+            product_type = product.product_type,
+            price = price,
+            quantity = quantity
+        )
+
         return Response({"success": "Product purchased successfully"}, status=status.HTTP_200_OK)
+    
+class PurchaseRecordViewset(viewsets.ReadOnlyModelViewSet):
+    queryset = PurchaseRecord.objects.all()
+    serializer_class = PurchaseRecordSerializer
+
+    def get_queryset(self):
+        pk = self.kwargs.get("pk")  
+        user = get_object_or_404(User, pk=pk)  
+        return self.queryset.filter(user=user)  
