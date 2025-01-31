@@ -59,54 +59,78 @@
             <!-- 상품 타입에 따른 분기 -->
             {% if product_data.0.product_type == "account" %}
                 <!-- 계정 상품 -->
-                <div class="product-info row">
-                    <div class="col-md-6">
-                        <h5>물품 정보</h5>
-                        <p><strong>게임:</strong> {{ product_data.0.game }}</p>
-                        <p><strong>직업:</strong> {{ product_data.0.account_class }}</p>
-                        <p><strong>수량:</strong> 1</p>
-                        <p><strong>상세 가격:</strong> {{ product_data.0.price }}크레딧</p>
+                <form action="{% url 'item_trade:product_info_handle' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="product-info row">
+                        <div class="col-md-6">
+                            <h5>물품 정보</h5>
+                            <p><strong>게임:</strong> {{ product_data.0.game }}</p>
+                            <p><strong>직업:</strong> {{ product_data.0.account_class }}</p>
+                            <p><strong>수량:</strong> 1</p>
+                            <p><strong>상세 가격:</strong> {{ product_data.0.price }}크레딧</p>
+                        </div>
+                        <input type="hidden" name="product_id" value="{{ product_data.0.id }}">
+                        <input type="hidden" name="product_type" value="{{ product_data.0.product_type }}">
+                        <input type="hidden" name="title" value="{{ product_data.0.title }}">
+                        <input type="hidden" name="price" value="{{ product_data.0.price }}">
+                        <div class="col-md-6">
+                            <p><strong>총 금액:</strong> <span id="total-price">{{ product_data.0.price }}</span>크레딧</p>
+                            <button class="btn btn-primary" name="action" value = "add_to_cart">장바구니</button>
+                            <button class="btn btn-success" name="action" value = "purchase">구매</button>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <p><strong>총 금액:</strong> <span id="total-price">{{ product_data.0.price }}</span>크레딧</p>
-                        <button class="btn btn-primary">장바구니</button>
-                        <a href="{% url 'item_trade:product_purchase' product_data.0.product_type product_data.0.id %}"><button class="btn btn-success">구매</button></a>
-                    </div>
-                </div>
+                </form>
+
+                
 
             {% elif product_data.0.product_type == "item" %}
                 <!-- 아이템 상품 -->
-                <div class="product-info row">
-                    <div class="col-md-6">
-                        <h5>물품 정보</h5>
-                        <p><strong>게임:</strong> {{ product_data.0.game }}</p>
-                        <p><strong>아이템:</strong> {{ product_data.0.item_name }}</p>
-                        <p><strong>수량:</strong> {{ product_data.0.quantity }} </p>
-                        <p><strong>상세 가격:</strong> {{ product_data.0.price_per_item }}크레딧</p>
+                <form action="{% url 'item_trade:product_info_handle' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="product-info row">
+                        <div class="col-md-6">
+                            <h5>물품 정보</h5>
+                            <p><strong>게임:</strong> {{ product_data.0.game }}</p>
+                            <p><strong>아이템:</strong> {{ product_data.0.item_name }}</p>
+                            <p><strong>수량:</strong> {{ product_data.0.quantity }} </p>
+                            <p><strong>상세 가격:</strong> {{ product_data.0.price_per_item }}크레딧</p>
+                        </div>
+                        <input type="hidden" name="product_id" value="{{ product_data.0.id }}">
+                        <input type="hidden" name="product_type" value="{{ product_data.0.product_type }}">
+                        <input type="hidden" name="title" value="{{ product_data.0.title }}">
+                        <input type="hidden" name="price" value="{{ product_data.0.price_per_item }}">
+                        <div class="col-md-6">
+                            <p><strong>총 금액:</strong> <span id="total-price">{{ product_data.0.price_per_item }}</span>크레딧</p>
+                            <button class="btn btn-primary" name="action" value = "add_to_cart">장바구니</button>
+                            <button class="btn btn-success" name="action" value = "purchase">구매</button>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <p><strong>총 금액:</strong> <span id="total-price">{{ product_data.0.price_per_item }}</span>크레딧</p>
-                        <button class="btn btn-primary">장바구니</button>
-                        <a href="{% url 'item_trade:product_purchase' product_data.0.product_type product_data.0.id %}"><button class="btn btn-success">구매</button></a>
-                    </div>
-                </div>
+                </form>
+                
 
             {% elif product_data.0.product_type == "game_money" %}
                 <!-- 게임머니 상품 -->
-                <div class="product-info row">
-                    <div class="col-md-6">
-                        <h5>물품 정보</h5>
-                        <p><strong>게임:</strong> {{ product_data.0.game }}</p>
-                        <p><strong>총 게임 머니:</strong> {{ product_data.0.total_amount }}</p>
-                        <p><strong>총 금액:</strong> {{ product_data.0.total_price }}크레딧</p>
+                <form action="{% url 'item_trade:product_info_handle' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="product-info row">
+                        <div class="col-md-6">
+                            <h5>물품 정보</h5>
+                            <p><strong>게임:</strong> {{ product_data.0.game }}</p>
+                            <p><strong>총 게임 머니:</strong> {{ product_data.0.total_amount }}</p>
+                            <p><strong>총 금액:</strong> {{ product_data.0.total_price }}크레딧</p>
+                        </div>
+                        <input type="hidden" name="product_id" value="{{ product_data.0.id }}">
+                        <input type="hidden" name="product_type" value="{{ product_data.0.product_type }}">
+                        <input type="hidden" name="title" value="{{ product_data.0.title }}">
+                        <input type="hidden" name="price" value="{{ product_data.0.total_price }}">
+                        <div class="col-md-6">
+                            <p><strong>총 금액:</strong> <span id="total-price">{{ product_data.0.total_price }}</span>크레딧</p>
+                            <button class="btn btn-primary" name="action" value = "add_to_cart">장바구니</button>
+                            <button class="btn btn-success" name="action" value = "purchase">구매</button>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <p><strong>총 금액:</strong> <span id="total-price">{{ product_data.0.total_price }}</span>크레딧</p>
-                        <button class="btn btn-primary">장바구니</button>
-                        <a href="{% url 'item_trade:product_purchase' product_data.0.product_type product_data.0.id %}"><button class="btn btn-success">구매</button></a>
-                    </div>
-                </div>
-
+                </form>
+                
             {% else %}
                 <!-- 상품 타입 미지정 -->
                 <div class="product-info">

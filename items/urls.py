@@ -4,7 +4,8 @@ from . import views
 app_name = "products"
 
 urlpatterns = [
-    path('game/',views.CreateGameView.as_view()),
+    path('game/',views.GameView.as_view({"get":"list"})),
+    path('game/<int:pk>/',views.GameView.as_view({"get" : "get_game_list"})),
     path('create/', views.CreateProductView.as_view(), name='create_product'),
     path('get-recently-create-item/',views.ProductViewsets.as_view({
         "get":"get_recently_create_item",

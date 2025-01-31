@@ -5,6 +5,7 @@ from django.contrib.auth.password_validation import validate_password # DjangoÏù
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from .models import UserCredit
+from shopping_cart.models import Cart
 
 class SignUpSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required = True, validators = [UniqueValidator(queryset=User.objects.all())])
@@ -32,6 +33,7 @@ class SignUpSerializer(serializers.ModelSerializer):
         user.set_password(validated_data["password"])
         user.save()
         credit = UserCredit.objects.create(user = user, credit = 0)
+        cart = Cart.objects.create(user = user)
 
         token = Token.objects.create(user=user)
         return user

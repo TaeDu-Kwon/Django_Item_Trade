@@ -20,5 +20,9 @@ urlpatterns = [
     path('payFail/', views.payFail),
     path('payCancel/', views.payCancel),
     path('my-page/',views.my_page, name = "my_page"),
+    path('cart/',views.shopping_cart, name = "shopping_cart"),
+    path('cart-destory/<int:product_id>/<str:product_type>',views.shopping_cart_destory, name = "shopping_cart_destory"),
+    path('product-info-handle',views.prduct_info_page_handle, name = "product_info_handle"),
+    path('game',views.game_page, name = "game_page"),
 ]
 

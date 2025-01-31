@@ -88,6 +88,9 @@
         .view-details a:hover {
             text-decoration: underline;
         }
+        .history {
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -110,9 +113,12 @@
         </div>
         <div class="view-details"></div>
     </div>
-
+    
     <br>
-   
+    <div class = "history">
+        <h2> - 구매 내역 - </h2>
+    </div>
+    
     {% if purchase_record.detail != "No PurchaseRecord matches the given query."%}
         {% for product in purchase_record %}
             <div class="container">
@@ -123,9 +129,6 @@
                     <div class="order-details">
                         <h2>{{ product.product_title }}</h2>
                         <p>{{ product.price }} · {{ product.quantity }}개</p>
-                    </div>
-                    <div class="order-actions">
-                        <button>장바구니 담기</button>
                     </div>
                 </div>
                 <div class="view-details">

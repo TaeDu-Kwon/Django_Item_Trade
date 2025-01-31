@@ -18,6 +18,32 @@ class CreateGameView(generics.CreateAPIView):
     serializer_class = GameSerializer
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+    
+class GameView(viewsets.ModelViewSet):
+    queryset = Game.objects.all()
+    serializer_class = GameSerializer
+
+    def get_game_list(self,request, pk=None, *args, **kwargs):
+        # 게임 검색하면 아이템들 정보 보내주는 역활
+
+        game = get_object_or_404(Game,pk = pk)
+
+        account_product = AccountProduct.objects.filter(game = game)
+        item_product = ItemProduct.objects.filter(game = game)
+        game_money_product = GameMoneyProduct.objects.filter(game = game)
+
+        context = {"view_type": "read"}
+        account_serializer = AccountProductSerializer(account_product, many = True, context=context)
+        item_serializer = ItemProductSerializer(item_product, many = True, context=context)
+        game_money_serializer = GameMoneyProductSerializer(game_money_product, many = True, context=context)
+
+        return Response({
+            "game" : game.name,
+            "account_data": account_serializer.data,
+            "item_data": item_serializer.data,
+            "game_money_data": game_money_serializer.data,
+        },status=status.HTTP_200_OK)
+
 
 # 상품 생성은 generics 사용
 class CreateProductView(generics.CreateAPIView):
@@ -78,7 +104,7 @@ class ProductViewsets(viewsets.ModelViewSet):
         },status=status.HTTP_200_OK)
     
     def get_recent_products(self,model):
-        return model.objects.filter(sold_out=False).order_by("-created_at")[:5]
+        return model.objects.filter(sold_out=False).order_by("-created_at")[:3]
 
     def get_product_info(self,request, *args, **kwargs): 
         # 상품 상세 페이지지

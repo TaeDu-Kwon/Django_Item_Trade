@@ -13,18 +13,24 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from users.models import UserCredit
 
+from shopping_cart.models import Cart,CartItem
 
 API_PATH = "http://127.0.0.1:8001/"
 
 # ---------------------------------------- 매인 페이지 관련 ------------------------------------------- #
 def home_page(request):
     # 매인 페이지 관련 함수
-    # item app에서 최근 등록된 5개 상품 찾아와 보여주도록 설정정
+    # item app에서 최근 등록된 3개 상품 찾아와 보여주도록 설정정
     path = "http://127.0.0.1:8001/products/get-recently-create-item"
     items = {}
     
     res = requests.get(path)
     items = res.json()
+
+    path = "http://127.0.0.1:8001/products/game"
+    re = requests.get(path)
+    game = re.json()
+    
     
     table_data = {
         "account_data" : items["account_data"],
@@ -32,7 +38,7 @@ def home_page(request):
         "game_money_data" : items["game_money_data"]
     }
     
-    return render(request,"item_trade_page/home_page.html",{"user" : request.user,"table_data":table_data})
+    return render(request,"item_trade_page/home_page.html",{"user" : request.user,"table_data":table_data,"game":game})
 
 def login_page(request):
     # 로그인 페이지 관련 함수
@@ -61,6 +67,7 @@ def signup_page(request):
         if serializer.is_valid():
             user = serializer.save()
             messages.success(request, "회원가입 성공하였습니다.")
+            user.backend = 'users.backends.EmailAuthBackend' # 제작한 백앤드 설정
             login(request, user)
             return redirect("item_trade:home_page")
         else:
@@ -74,6 +81,26 @@ def logout_view(request):
     # 로그아웃
     logout(request)
     return redirect("item_trade:home_page")
+
+def game_page(request):
+    selscted_game_id = request.GET.get("selected_game")
+    
+    path = API_PATH + "products/game/{}".format(int(selscted_game_id))
+    res = requests.get(path)
+    game_list = res.json()
+    print("@@@@@")
+    print(game_list)
+    print("@@@@@")
+
+    game_lists = {
+        "game" : game_list["game"],
+        "account_data" : game_list["account_data"],
+        "item_data" : game_list["item_data"],
+        "game_money_data" : game_list["game_money_data"]
+    }
+    
+
+    return render(request, "item_trade_page/game_page.html", {"game_lists":game_lists})
 
 # ---------------------------------------- 상품 등록 관련 ------------------------------------------- #
 
@@ -128,18 +155,19 @@ def product_info_page(request,product_type,product_id):
     # 상품 상세페이지 관련 함수
     respone = requests.get(API_PATH+"products/get-product-info/{}/{}".format(product_type,product_id))
     product_data = respone.json()
-    
 
     return render(request, "item_trade_page/product_info_page.html",product_data)
 
 @login_required # 로그인이 필요한 뷰
 def product_purchase_page(request,product_type,product_id):
-    # 결제 페이지 관련 함수 
+    # 결제 페이지 관련 함수 ( 장바구니에서 사용할 예정 )
     respone = requests.get(API_PATH+"products/get-product-info/{}/{}".format(product_type,product_id))
     product_data = respone.json()
 
     # 최종 결제 함수에서 데이터 사용하기 위해서 session에 저장한다
-    request.session["product_data"] = product_data 
+    request.session["product_data"] = product_data
+
+    res = requests.get(API_PATH+"cart/cart-items/{}".format(product_id))
 
     return render(request, "item_trade_page/product_purchase_page.html",product_data)
 
@@ -243,7 +271,9 @@ def paySuccess(request):
         return redirect('/payFail')
     else:
         user = User.objects.get(username = request.session['user'])
-        UserCredit.objects.update(user = user, credit = request.session["credit"])
+        user_credit = UserCredit.objects.get(user=user)
+        user_credit.credit += request.session["credit"]  # 기존 크레딧에 추가
+        user_credit.save()  # 저장
         return redirect("item_trade:home_page")  
     
 def payFail(request):
@@ -251,6 +281,8 @@ def payFail(request):
 def payCancel(request):
     return render(request, 'payCancel.html')
 
+# ---------------------------------------- 마이 페이지 및 장바구니 ------------------------------------------- #
+@login_required # 로그인이 필요한 뷰
 def my_page(request):
     # 마이페이지 관련 함수
     res = requests.get(API_PATH + "products/purchases/{}".format(request.user.id))
@@ -258,3 +290,58 @@ def my_page(request):
     purchase_record = res.json()
 
     return render(request, "item_trade_page/my_page.html",{"user":request.user,"purchase_record" : purchase_record, "user_credit" : user_credit})
+
+@login_required # 로그인이 필요한 뷰
+def shopping_cart(request):
+    try:
+        cart = Cart.objects.get(user = request.user)
+        cart_item = CartItem.objects.filter(cart = cart)
+
+    except:
+        cart_item = None
+
+    return render(request, "item_trade_page/shopping_cart.html",{"cart" : cart_item})
+
+@login_required # 로그인이 필요한 뷰
+def prduct_info_page_handle(request):
+    if request.method == "POST":
+        action = request.POST.get("action")
+        product_type = request.POST.get('product_type')
+        product_id = request.POST.get('product_id')
+
+        if action == "purchase":
+            respone = requests.get(API_PATH+"products/get-product-info/{}/{}".format(product_type,product_id))
+            product_data = respone.json()
+
+            # 최종 결제 함수에서 데이터 사용하기 위해서 session에 저장한다
+            request.session["product_data"] = product_data 
+
+            return render(request, "item_trade_page/product_purchase_page.html",product_data)
+        
+        elif action == "add_to_cart":
+            product_title = request.POST.get("title")
+            product_price = request.POST.get("price")
+
+            api_url = API_PATH + "cart/cart-items/"
+            headers = {"Content-Type": "application/json"}
+            data = {
+                "user" : request.user.id,
+                "product_id" : product_id,
+                "product_type" : product_type,
+                "title" : product_title,
+                "price" : product_price
+            }
+            
+            respone = requests.post(api_url, headers=headers , data=json.dumps(data, ensure_ascii=False))
+
+
+            if respone.status_code == 201:
+                return redirect("item_trade:home_page")
+
+@login_required # 로그인이 필요한 뷰
+def shopping_cart_destory(request, product_id,product_type):
+    
+    res = requests.delete(API_PATH+"cart/cart-items/{}/{}/{}".format(int(request.user.id),int(product_id),str(product_type)))
+
+    if res.status_code == 204:
+        return redirect("item_trade:home_page")
