@@ -20,8 +20,8 @@ Rest Framework
 - **`개인 페이지`**: 사용자의 크레딧 및 구매 내력을 확인할 수 있습니다.
 
 ### **서버 실행**
-## py manage.py runserver 8001
-## python3 mange.py runserer 8001
+**py manage.py runserver 8001**
+**python3 manage.py runserver 8001**
 
 ## 프로젝트 구조
 ### 1. **User 앱**
