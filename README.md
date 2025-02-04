@@ -21,6 +21,7 @@ Rest Framework
 
 ### **서버 실행**
 **py manage.py runserver 8001**
+
 **python3 manage.py runserver 8001**
 
 ## 프로젝트 구조
